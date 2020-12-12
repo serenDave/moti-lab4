@@ -1,7 +1,7 @@
 import React from 'react';
 import { GiPerson } from 'react-icons/gi';
 
-const Player = ({ opponent, result }) => {
+const Player = ({ opponent, result, score }) => {
     let text;
     let resultText;
 
@@ -18,6 +18,7 @@ const Player = ({ opponent, result }) => {
             {result && <h4>{resultText}</h4>}
             <h3 style={{ textAlign: 'center' }}>{text}</h3>
             <GiPerson size={100} />
+            <p style={{ fontSize: '20px' }}>Кількість очок: {score}</p>
         </div>
     );
 };

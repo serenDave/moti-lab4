@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from 'react';
+import { Dropdown, Form } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button';
 import Matrix from './components/Matrix/Matrix';
 import Player from './components/Player/Player';
@@ -7,14 +8,15 @@ const initialState = {
     gameState: 'not-started',
     strategy: null,
     multiplier: 1,
+    score: 0,
     opponentMultiplier: 1,
     opponentStrategy: null,
+    opponentsScore: 0,
     finalResult: null,
-    matrix: null,
-}; 
+    matrix: null
+};
 
 class App extends Component {
-
     state = initialState;
     previousTableCell = null;
 
@@ -36,10 +38,14 @@ class App extends Component {
                                 matrix[i - 1][j - 1] = 0;
                                 break;
                             case 2:
-                                matrix[i - 1][j - 1] = 2;
+                                matrix[i - 1][j - 1] =
+                                    1 * this.state.multiplier + 1 * this.state.opponentMultiplier;
                                 break;
                             case 3:
-                                matrix[i - 1][j - 1] = -3;
+                                matrix[i - 1][j - 1] = -(
+                                    1 * this.state.multiplier +
+                                    2 * this.state.opponentMultiplier
+                                );
                                 break;
                             case 4:
                                 matrix[i - 1][j - 1] = 0;
@@ -51,7 +57,10 @@ class App extends Component {
                     case 2:
                         switch (j) {
                             case 1:
-                                matrix[i - 1][j - 1] = -2;
+                                matrix[i - 1][j - 1] = -(
+                                    1 * this.state.multiplier +
+                                    1 * this.state.opponentMultiplier
+                                );
                                 break;
                             case 2:
                                 matrix[i - 1][j - 1] = 0;
@@ -60,8 +69,9 @@ class App extends Component {
                                 matrix[i - 1][j - 1] = 0;
                                 break;
                             case 4:
-                                matrix[i - 1][j - 1] = 3;
-                                break;        
+                                matrix[i - 1][j - 1] =
+                                    1 * this.state.multiplier + 2 * this.state.opponentMultiplier;
+                                break;
                             default:
                                 break;
                         }
@@ -69,7 +79,8 @@ class App extends Component {
                     case 3:
                         switch (j) {
                             case 1:
-                                matrix[i - 1][j - 1] = 3;
+                                matrix[i - 1][j - 1] =
+                                    1 * this.state.multiplier + 2 * this.state.opponentMultiplier;
                                 break;
                             case 2:
                                 matrix[i - 1][j - 1] = 0;
@@ -78,8 +89,11 @@ class App extends Component {
                                 matrix[i - 1][j - 1] = 0;
                                 break;
                             case 4:
-                                matrix[i - 1][j - 1] = -4;
-                                break;        
+                                matrix[i - 1][j - 1] = -(
+                                    2 * this.state.multiplier +
+                                    2 * this.state.opponentMultiplier
+                                );
+                                break;
                             default:
                                 break;
                         }
@@ -90,10 +104,14 @@ class App extends Component {
                                 matrix[i - 1][j - 1] = 0;
                                 break;
                             case 2:
-                                matrix[i - 1][j - 1] = -3;
+                                matrix[i - 1][j - 1] = -(
+                                    2 * this.state.multiplier +
+                                    1 * this.state.opponentMultiplier
+                                );
                                 break;
                             case 3:
-                                matrix[i - 1][j - 1] = 4;
+                                matrix[i - 1][j - 1] =
+                                    2 * this.state.multiplier + 2 * this.state.opponentMultiplier;
                                 break;
                             case 4:
                                 matrix[i - 1][j - 1] = 0;
@@ -101,7 +119,7 @@ class App extends Component {
                             default:
                                 break;
                         }
-                        break;            
+                        break;
                     default:
                         break;
                 }
@@ -143,9 +161,9 @@ class App extends Component {
 
     clearPreviousTableCell() {
         if (this.previousTableCell) {
-            this.previousTableCell.textContent = ""
+            this.previousTableCell.textContent = '';
             this.previousTableCell.style.backgroundColor = 'white';
-            this.previousTableCell.style.color = "black";
+            this.previousTableCell.style.color = 'black';
         }
     }
 
@@ -169,7 +187,7 @@ class App extends Component {
         } else if (this.state.strategy[1] === 2 && this.state.opponentStrategy[0] === 2) {
             score++;
         }
-        
+
         // Then opponents scores
         if (this.state.opponentStrategy[1] === 1 && this.state.strategy[0] === 1) {
             opponentsScore++;
@@ -181,10 +199,14 @@ class App extends Component {
 
         if (score > opponentsScore) {
             result = 'win';
-            points += this.state.opponentStrategy[1] * this.state.opponentMultiplier;
+            points +=
+                +this.state.strategy[1] * this.state.multiplier +
+                this.state.opponentStrategy[1] * this.state.opponentMultiplier;
         } else if (opponentsScore > score) {
             result = 'lose';
-            opponentsPoints += this.state.strategy[1] * this.state.multiplier;
+            opponentsPoints +=
+                +this.state.strategy[1] * this.state.multiplier +
+                this.state.opponentStrategy[1] * this.state.opponentMultiplier;
         } else {
             result = 'draw';
         }
@@ -202,7 +224,12 @@ class App extends Component {
 
         this.previousTableCell = tableCell;
 
-        this.setState({ finalResult: result, gameState: 'finished' });
+        this.setState({
+            finalResult: result,
+            gameState: 'finished',
+            score: this.state.score + points,
+            opponentsScore: this.state.opponentsScore + opponentsPoints
+        });
     }
 
     startGame() {
@@ -210,6 +237,8 @@ class App extends Component {
 
         const startState = { ...initialState };
         delete startState.matrix;
+        delete startState.score;
+        delete startState.opponentsScore;
 
         this.setState({ ...startState });
     }
@@ -258,7 +287,7 @@ class App extends Component {
                         <div className="strategies">
                             <Button
                                 variant="outline-success"
-                                onClick={() => { 
+                                onClick={() => {
                                     this.setState({ strategy: [1, 1] }, () => {
                                         this.processMove();
                                     });
@@ -268,7 +297,7 @@ class App extends Component {
                             </Button>
                             <Button
                                 variant="outline-success"
-                                onClick={() => { 
+                                onClick={() => {
                                     this.setState({ strategy: [1, 2] }, () => {
                                         this.processMove();
                                     });
@@ -278,7 +307,7 @@ class App extends Component {
                             </Button>
                             <Button
                                 variant="outline-success"
-                                onClick={() => { 
+                                onClick={() => {
                                     this.setState({ strategy: [2, 1] }, () => {
                                         this.processMove();
                                     });
@@ -288,7 +317,7 @@ class App extends Component {
                             </Button>
                             <Button
                                 variant="outline-success"
-                                onClick={() => { 
+                                onClick={() => {
                                     this.setState({ strategy: [2, 2] }, () => {
                                         this.processMove();
                                     });
@@ -301,16 +330,19 @@ class App extends Component {
                 );
                 break;
             case 'finished':
-                const text = this.state.finalResult === 'win' 
-                    ? 'Ви виграли!' 
-                    : this.state.finalResult === 'lose'
-                        ? 'Ви програли!' 
+                const text =
+                    this.state.finalResult === 'win'
+                        ? 'Ви виграли!'
+                        : this.state.finalResult === 'lose'
+                        ? 'Ви програли!'
                         : 'Нічия!';
 
                 element = (
                     <Fragment>
                         <h2>{text}</h2>
-                        <Button variant="success" onClick={() => this.startGame()}>Грати ще раз?</Button>
+                        <Button variant="success" onClick={() => this.startGame()}>
+                            Грати ще раз?
+                        </Button>
                     </Fragment>
                 );
                 break;
@@ -328,22 +360,74 @@ class App extends Component {
                     <p>Гра в пальці</p>
                     <ul>
                         <li style={{ marginRight: '20px' }}>
-                            <Button variant="warning" onClick={() => {
-                                const strategy = this.getOptimalStrategy();
-                                const strategyElem = document.getElementById(`strategy-${strategy}`);
-                                strategyElem.style.backgroundColor = '#ffc107';
-                            }}>Показати оптимальну стратегію</Button>
+                            <Dropdown>
+                                <Dropdown.Toggle variant="success" id="dropdown-basic">
+                                    Задати параметри гри
+                                </Dropdown.Toggle>
+                                <Dropdown.Menu>
+                                    <Form style={{ padding: '10px' }}>
+                                        <Form.Group controlId="multiplier">
+                                            <Form.Label>Кількість очок за свої пальці</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                value={this.state.multiplier}
+                                                onChange={(e) => {
+                                                    this.setState({ multiplier: +e.target.value });
+                                                }}
+                                            />
+                                        </Form.Group>
+
+                                        <Form.Group controlId="opponentMultiplier">
+                                            <Form.Label>Кількість очок за пальці опонента</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                value={this.state.opponentMultiplier}
+                                                onChange={(e) => {
+                                                    this.setState({
+                                                        opponentMultiplier: +e.target.value
+                                                    });
+                                                }}
+                                            />
+                                        </Form.Group>
+
+                                        <Button
+                                            variant="primary"
+                                            type="submit"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                this.initiateMatrix();
+                                            }}
+                                        >
+                                            Підтвердити
+                                        </Button>
+                                    </Form>
+                                </Dropdown.Menu>
+                            </Dropdown>
+                        </li>
+                        <li style={{ marginRight: '20px' }}>
+                            <Button
+                                variant="warning"
+                                onClick={() => {
+                                    const strategy = this.getOptimalStrategy();
+                                    const strategyElem = document.getElementById(`strategy-${strategy}`);
+                                    strategyElem.style.backgroundColor = '#ffc107';
+                                }}
+                            >
+                                Показати оптимальну стратегію
+                            </Button>
                         </li>
                         <li>
-                            <Button variant="primary" onClick={() => this.showMatrix()}>Показати матрицю гри</Button>
+                            <Button variant="primary" onClick={() => this.showMatrix()}>
+                                Показати матрицю гри
+                            </Button>
                         </li>
                     </ul>
                 </header>
                 <main>
                     <div className="container-custom">
-                        <Player result={this.state.finalResult} />
+                        <Player result={this.state.finalResult} score={this.state.score} />
                         <Matrix />
-                        <Player result={this.state.finalResult} opponent />
+                        <Player result={this.state.finalResult} opponent score={this.state.opponentsScore} />
                     </div>
                     <div className="actions">{this.renderActions()}</div>
                 </main>
